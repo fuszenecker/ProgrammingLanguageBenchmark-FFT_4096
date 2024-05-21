@@ -1,6 +1,5 @@
 use num_complex::Complex;
-
-type Cf32 = Complex<f32>;
+pub type Cf32 = Complex<f32>;
 
 pub struct Fft {
     phasevec: [Cf32; 32],
