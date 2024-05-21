@@ -1,7 +1,9 @@
 use num_complex::Complex;
 
+type Cf32 = Complex<f32>;
+
 pub struct Fft {
-    phasevec: [Complex<f32>; 32],
+    phasevec: [Cf32; 32],
 }
 
 // Public function
@@ -18,7 +20,7 @@ impl Fft {
         fft
     }
 
-    pub fn fft(&self, xy_out: &mut [Complex<f32>], xy_in: &[Complex<f32>]) {
+    pub fn fft(&self, xy_out: &mut [Cf32], xy_in: &[Cf32]) {
         let log2point = xy_in.len().ilog2();
         // if we use these assert_eq checks, the compiler can produce a faster code
         assert_eq!(xy_out.len(), xy_in.len());
