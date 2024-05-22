@@ -1,11 +1,11 @@
 mod fft;
 mod fft_c;
 
-type Cf32 = fft::Cf32;
-
 use num_complex::{Complex, ComplexFloat};
+use rand::Rng;
 use std::time::Instant;
 
+type Cf32 = fft::Cf32;
 const LOG2FFTSIZE: u32 = 12;
 const FFT_REPEAT: u32 = 10_000;
 const SIZE: usize = 1 << LOG2FFTSIZE;
@@ -48,7 +48,24 @@ fn main() {
     for _i in 0..FFT_REPEAT {
         ffto.fft(&mut xy_out_fft, &xy)
     }
-    stop_time(&start_time, &xy_out_fft, "Rust");
+    stop_time(&start_time, &xy_out_fft, "Rust code (+1.0, -1.0)");
+
+    // Random number
+    let mut rng = rand::thread_rng();
+    for xy_act in xy.iter_mut().take(SIZE / 2) {
+        *xy_act = Complex::new(rng.gen_range(-0.707..0.707), rng.gen_range(-0.707..0.707));
+    }
+    for xy_act in xy.iter_mut().take(SIZE).skip(SIZE / 2) {
+        *xy_act = Complex::new(rng.gen_range(-0.707..0.707), rng.gen_range(-0.707..0.707));
+    }
+
+    // FFT - Rust
+    let ffto = fft::Fft::new();
+    let start_time = Instant::now();
+    for _i in 0..FFT_REPEAT {
+        ffto.fft(&mut xy_out_fft, &xy)
+    }
+    stop_time(&start_time, &xy_out_fft, "Rust code (rndnum)");
 
     // FFT - C
     let start_time = Instant::now();
