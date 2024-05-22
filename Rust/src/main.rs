@@ -16,7 +16,7 @@ fn stop_time(start_time: &Instant, xy_out_fft: &[Cf32], txt: &str) {
         + (elapsed_time.subsec_nanos() as f64 / 1_000_000.0);
 
     println!(
-        "\n{txt} {FFT_REPEAT} piece(s) of {SIZE} pt FFT;    {} ms/piece",
+        "\n{txt} {FFT_REPEAT} piece(s) of {SIZE} pt FFT;    {:.5} ms/piece",
         milliseconds / FFT_REPEAT as f64
     );
 

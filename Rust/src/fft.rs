@@ -19,6 +19,7 @@ impl Fft {
         fft
     }
 
+    #[inline(never)]
     pub fn fft(&self, xy_out: &mut [Cf32], xy_in: &[Cf32]) {
         let log2point = xy_in.len().ilog2();
         // if we use these assert_eq checks, the compiler can produce a faster code

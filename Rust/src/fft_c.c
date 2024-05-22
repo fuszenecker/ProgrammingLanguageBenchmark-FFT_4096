@@ -14,7 +14,7 @@ static float complex phasevec[32];
     if (!phasevec_exist) {
 	for (int i=0; i<32; i++) {
 	    int point = 2<<i;
-	    phasevec[i] = cos(-2*M_PI/point) + sin(-2*M_PI/point)*I;
+	    phasevec[i] = cosf(-2*M_PI/point) + sinf(-2*M_PI/point)*I; // cosf - float
 	}
 	phasevec_exist = 1;
     }
