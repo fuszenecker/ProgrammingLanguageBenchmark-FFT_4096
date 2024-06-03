@@ -1,7 +1,7 @@
 OBJS=benchmark
 
 all:
-	nim c --opt:speed benchmark.nim
+	nim c -d:release --opt:speed benchmark.nim
 
 clean:
 	rm -rf $(OBJS)
