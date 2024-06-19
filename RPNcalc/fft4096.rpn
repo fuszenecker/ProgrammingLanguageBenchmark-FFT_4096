@@ -1,0 +1,164 @@
+12 0 save		# 0: LOG2SIZE
+
+1 0 load shl 1 save	# 1: SIZE
+32 0 load -  2 save	# 2: 32 - LOG2SIZE
+			# 3: mmax
+			# 4: wphase_xy
+			# 4: w_xy
+
+1 load 0 vcplx		# input vector
+1 load 1 vcplx		# output vector
+32     2 vcplx		# phase table
+
+: fill_h1
+    1 load 2 /
+    [ 1 - dup
+      1 0 ascplx swap
+      0 vsave
+      dup
+    ]
+    drop
+    ;
+
+: fill_h2
+    1 load 2 /
+    [ dup
+     -1 ascplx swap
+      0 vsave
+      1 + dup
+      1 load  <
+    ]
+    drop
+    ;
+
+: phasevec_table_gen
+    0 1
+    [
+      swap dup rot
+      2 *
+      # -----
+      dup
+      -6.283185307179586 swap /
+      dup cosr swap sinr
+      r2c
+      rot 2 vsave
+      # -----
+      swap 1 +
+      swap
+      over 32 <
+    ]
+    drop
+    drop
+    ;
+
+: bitreverse  # value -> value
+    dup
+    2863311530 and      # 0xaaaaaaaa
+    1 shr
+    swap
+    1431655765 and      # 0x55555555
+    1 shl
+    or
+
+    dup
+    3435973836 and      # 0xcccccccc
+    2 shr
+    swap
+    858993459  and      # 0x33333333
+    2 shl
+    or
+
+    dup
+    4042322160 and      # 0xf0f0f0f0
+    4 shr
+    swap
+    252645135  and      # 0x0f0f0f0f
+    4 shl
+    or
+
+    dup
+    4278255360 and      # 0xff00ff00
+    8 shr
+    swap
+    16711935   and      # 0x00ff00ff
+    8 shl
+    or
+
+    dup
+    16 shr
+    swap
+    65535      and      # 0x0000ffff
+    16 shl
+    or
+    ;
+
+: reverse_order
+    1 load
+    [
+      1 -
+      dup dup bitreverse
+      2 load shr
+      swap 0 vload
+      swap 1 vsave
+      dup
+    ]
+    drop
+    ;
+
+: fft
+    reverse_order
+    0
+    [
+      dup dup
+      1 swap shl 3 save
+      2 vload    4 save
+      1 0 ascplx 5 save
+
+      0
+      [
+        dup
+        [
+          # -------
+          dup dup dup
+          dup 3 load + dup
+          1 vload 5 load *
+          rot over
+          swap 1 vload swap -
+          rot 1 vsave
+          swap 1 vload +
+          swap 1 vsave
+          # -------
+          3 load dup + +
+          dup 1 load <
+        ]
+        drop
+        5 load 4 load * 5 save
+        1 + dup
+        3 load <
+      ]
+      drop
+      1 +
+      dup
+      0 load <
+    ]
+    drop
+    ;
+
+
+# ---- main ----
+
+fill_h1
+fill_h2
+phasevec_table_gen
+
+: n_fft [ fft 1 - dup ] ;
+100 n_fft
+
+0 1 vload p drop
+1 1 vload p drop
+2 1 vload p drop
+3 1 vload p drop
+4 1 vload p drop
+5 1 vload p drop
+
+quit
