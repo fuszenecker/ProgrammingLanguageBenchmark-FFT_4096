@@ -12,7 +12,8 @@
 
 : fill_h1
     1 load 2 /
-    [ 1 - dup
+    [
+      1 - dup
       1 0 ascplx swap
       0 vsave
       dup
@@ -22,8 +23,9 @@
 
 : fill_h2
     1 load 2 /
-    [ dup
-     -1 ascplx swap
+    [
+      dup
+     -1 0 ascplx swap
       0 vsave
       1 + dup
       1 load  <
