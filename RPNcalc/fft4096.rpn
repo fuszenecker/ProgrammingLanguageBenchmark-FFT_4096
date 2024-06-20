@@ -153,8 +153,8 @@ fill_h1
 fill_h2
 phasevec_table_gen
 
-: n_fft [ fft 1 - dup ] ;
-100 n_fft
+: n_fft [ fft 1 - dup ] drop ;
+1000 n_fft
 
 0 1 vload p drop
 1 1 vload p drop
