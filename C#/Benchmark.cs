@@ -5,8 +5,6 @@ using static CSharpFftDemo.GlobalResourceManager;
 
 namespace CSharpFftDemo;
 
-// q: how to move it to suppession file?
-
 internal sealed class Arguments
 {
     [Option(shortName: 'd', longName: "dotnet-benchmark", Default = false,
