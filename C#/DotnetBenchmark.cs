@@ -10,7 +10,7 @@ namespace CSharpFftDemo;
 
 [MinColumn, MaxColumn, MeanColumn, MedianColumn]
 [MemoryDiagnoser]
-[DisassemblyDiagnoser(syntax: DisassemblySyntax.Att, printSource: true, exportCombinedDisassemblyReport: true)]
+[DisassemblyDiagnoser]
 public class DotnetBenchmark
 {
     private static readonly int size = 1 << Params.Log2FftSize;
