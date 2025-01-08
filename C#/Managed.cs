@@ -66,7 +66,7 @@ internal static class FftManaged
             xy[i] = new Complex(-1.0, 0.0);
         }
 
-        // JIT warm up ... possible give more speed
+        // JIT warm up ... possible gives more speed
         for (i = 0; i < fftRepeat; i++)
         {
             Fft.Calculate(log2FftSize, xy, xy_out);

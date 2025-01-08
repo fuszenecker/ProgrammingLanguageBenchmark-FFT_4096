@@ -8,10 +8,13 @@ namespace CSharpFftDemo;
 
 internal static partial class FftNative
 {
-    [StructLayout(LayoutKind.Sequential)]
+    [StructLayout(LayoutKind.Explicit)]
     internal struct DoubleComplex(double real, double imaginary)
     {
+        [FieldOffset(0)]
         public double Real = real;
+
+        [FieldOffset(8)]
         public double Imaginary = imaginary;
 
         public override readonly string ToString()
