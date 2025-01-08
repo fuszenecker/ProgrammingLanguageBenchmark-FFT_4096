@@ -15,7 +15,7 @@ internal sealed class Arguments
         Required = false, HelpText = "Run the .NET managed benchmark")]
     public bool ManagedBenchmark { get; set; }
 
-    [Option(shortName: 'n', longName: "native", Default = true,
+    [Option(shortName: 'n', longName: "native", Default = false,
         Required = false, HelpText = "Run the native (C-fast_double) benchmark")]
     public bool NativeBenchmark { get; set; }
 
