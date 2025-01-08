@@ -1,6 +1,7 @@
 using System;
 using System.Numerics;
 using BenchmarkDotNet.Attributes;
+using BenchmarkDotNet.Diagnosers;
 using BenchmarkDotNet.Running;
 
 using static CSharpFftDemo.GlobalResourceManager;
@@ -9,6 +10,7 @@ namespace CSharpFftDemo;
 
 [MinColumn, MaxColumn, MeanColumn, MedianColumn]
 [MemoryDiagnoser]
+[DisassemblyDiagnoser(syntax: DisassemblySyntax.Att, printSource: true, exportCombinedDisassemblyReport: true)]
 public class DotnetBenchmark
 {
     private static readonly int size = 1 << Params.Log2FftSize;
