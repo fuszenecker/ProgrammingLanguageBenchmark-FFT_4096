@@ -1,7 +1,7 @@
 TARGET=./dist/fft-benchmark
-ARCH=x64 # arm, arm64, please consult: https://docs.microsoft.com/en-us/dotnet/core/rid-catalog#linux-rids 
+ARCH=x64 # 	arm, arm64, please consult: https://docs.microsoft.com/en-us/dotnet/core/rid-catalog#linux-rids 
 DESTDIR=dist
-VERSION=1.8.0
+VERSION=2.0.0
 
 CC=gcc
 CFLAGS =-Wall -O2 -funroll-all-loops -fPIC
@@ -24,8 +24,8 @@ OBJS=fft.o
 TARGET=benchmark
 
 all: libfft
-	dotnet build -c Release -p:VersionPrefix=$(VERSION)
-	dotnet publish -c Release -o $(DESTDIR) --self-contained -r linux-$(ARCH) -p:PublishTrimmed=True -p:VersionPrefix=$(VERSION)
+	dotnet build -c Release -p:VersionPrefix=$(VERSION) fft-benchmark.csproj
+	dotnet publish -c Release -o $(DESTDIR) --self-contained -r linux-$(ARCH) -p:PublishTrimmed=False -p:VersionPrefix=$(VERSION) fft-benchmark.csproj
 
 libfft: $(OBJS)
 	$(CC) $(OBJS) $(LDFLAGS) -o libfft.so

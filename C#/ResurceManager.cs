@@ -6,7 +6,7 @@ namespace CSharpFftDemo;
 
 internal static class GlobalResourceManager
 {
-    private static readonly ResourceManager resourceManager = new ResourceManager("FftBenchmark.Resources.Strings",
+    private static readonly ResourceManager resourceManager = new("FftBenchmark.Resources.Strings",
         Assembly.GetExecutingAssembly());
 
     public static string? GetStringResource(string name)

@@ -1,23 +1,14 @@
 using System;
 using System.Numerics;
 using BenchmarkDotNet.Attributes;
-using BenchmarkDotNet.Columns;
-using BenchmarkDotNet.Configs;
-using BenchmarkDotNet.Loggers;
 using BenchmarkDotNet.Running;
-using BenchmarkDotNet.Validators;
-using MathNet.Numerics.IntegralTransforms;
 
 using static CSharpFftDemo.GlobalResourceManager;
 
-#pragma warning disable CA1822
-
 namespace CSharpFftDemo;
 
-[MarkdownExporterAttribute.GitHub]
-[MinColumn, MaxColumn]
+[MinColumn, MaxColumn, MeanColumn, MedianColumn]
 [MemoryDiagnoser]
-// [NativeMemoryProfiler]
 public class DotnetBenchmark
 {
     private static readonly int size = 1 << Params.Log2FftSize;
@@ -33,13 +24,7 @@ public class DotnetBenchmark
         Console.WriteLine(GetStringResource("BenchmarkDotNetText"));
         Console.ForegroundColor = ConsoleColor.Gray;
 
-        var config = new ManualConfig()
-            .WithOptions(ConfigOptions.DisableOptimizationsValidator)
-            .AddValidator(JitOptimizationsValidator.DontFailOnError)
-            .AddLogger(ConsoleLogger.Default)
-            .AddColumnProvider(DefaultColumnProviders.Instance);
-
-        BenchmarkRunner.Run<DotnetBenchmark>(config);
+        _ = BenchmarkRunner.Run<DotnetBenchmark>();
     }
 
     public DotnetBenchmark()
@@ -47,24 +32,35 @@ public class DotnetBenchmark
         int i;
 
         for (i = 0; i < size / 2; i++)
+        {
             xyManaged[i] = new Complex(1.0, 0.0);
+        }
 
         for (i = size / 2; i < size; i++)
+        {
             xyManaged[i] = new Complex(-1.0, 0.0);
+        }
 
         for (i = 0; i < size / 2; i++)
+        {
             xyNative[i] = new FftNative.DoubleComplex(1.0f, 0.0f);
+        }
 
         for (i = size / 2; i < size; i++)
+        {
             xyNative[i] = new FftNative.DoubleComplex(-1.0f, 0.0f);
+        }
     }
 
     [Benchmark]
-    public void Managed() => Fft.Calculate(Params.Log2FftSize, xyManaged, xyOutManaged);
+    public void Managed()
+    {
+        Fft.Calculate(Params.Log2FftSize, xyManaged, xyOutManaged);
+    }
 
-    [Benchmark]
-    public void Native() => FftNative.Fft(Params.Log2FftSize, xyNative, xyOutNative);
-
-    [Benchmark]
-    public void MathNet() => Fourier.Forward(xyManaged);
+    [Benchmark(Baseline = true)]
+    public void Native()
+    {
+        FftNative.Fft(Params.Log2FftSize, xyNative, xyOutNative);
+    }
 }

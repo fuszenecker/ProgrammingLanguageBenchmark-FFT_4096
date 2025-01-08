@@ -26,7 +26,7 @@ internal static class FftManaged
         }
 
         // FFT
-        var stopwatch = Stopwatch.StartNew();
+        Stopwatch stopwatch = Stopwatch.StartNew();
 
         for (i = 0; i < fftRepeat; i++)
         {
@@ -37,7 +37,7 @@ internal static class FftManaged
 
         Console.WriteLine($"Total ({fftRepeat}): {stopwatch.ElapsedMilliseconds}");
 
-        var tpp = stopwatch.ElapsedMilliseconds / (float)fftRepeat;
+        float tpp = stopwatch.ElapsedMilliseconds / (float)fftRepeat;
 
         Console.WriteLine($"{fftRepeat} piece(s) of {1 << log2FftSize} pt FFT;  {tpp} ms/piece\n");
 
