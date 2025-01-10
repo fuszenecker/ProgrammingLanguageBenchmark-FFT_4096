@@ -2,11 +2,9 @@ using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 
-using static CSharpFftDemo.GlobalResourceManager;
-
 namespace CSharpFftDemo;
 
-internal static partial class NativeRust
+internal static partial class FftNativeRust
 {
     [StructLayout(LayoutKind.Explicit)]
     internal struct DoubleComplex(double real, double imaginary)
@@ -23,47 +21,47 @@ internal static partial class NativeRust
         }
     }
 
-    public partial class FftHandle : SafeHandle
+    internal partial class FftHandle : SafeHandle
     {
         public FftHandle() : base(0, true)
         {
-	    Console.WriteLine("Creating new Rust FFT handle.");
-            SetHandle(RustNew());
-	    Console.WriteLine("Rust FFT handle: 0x{0:X}", handle);
+            Console.WriteLine("Creating new Rust FFT handle.");
+            SetHandle(NewHandle());
+            Console.WriteLine("Rust FFT handle: 0x{0:X}", handle);
         }
 
         protected override bool ReleaseHandle()
         {
-	    Console.WriteLine("Disposing Rust FFT handle.");
-	    Free(handle);
-	    Console.WriteLine("Disposed Rust FFT handle.");
+            Console.WriteLine("Disposing Rust FFT handle.");
+            FreeHandle(handle);
+            Console.WriteLine("Disposed Rust FFT handle.");
             return true;
         }
 
         public override bool IsInvalid
-	{
+        {
             get
             {
                 return handle == IntPtr.Zero;
-	    }
-	}
+            }
+        }
 
         public void Fft(DoubleComplex[] xy_out, DoubleComplex[] xy_in, int size)
-	{
+        {
             Fft(handle, xy_out, xy_in, size);
-	}
+        }
 
         [LibraryImport(".//libfftr.so", EntryPoint = "new")]
         [DefaultDllImportSearchPaths(DllImportSearchPath.ApplicationDirectory)]
-        internal static partial IntPtr RustNew();
+        internal static partial IntPtr NewHandle();
 
         [LibraryImport("./libfftr.so", EntryPoint = "fft")]
         [DefaultDllImportSearchPaths(DllImportSearchPath.ApplicationDirectory)]
         internal static partial void Fft(IntPtr self_ptr, DoubleComplex[] xy_out, DoubleComplex[] xy_in, int length);
 
-	[LibraryImport("./libfftr.so", EntryPoint = "free")]
+        [LibraryImport("./libfftr.so", EntryPoint = "free")]
         [DefaultDllImportSearchPaths(DllImportSearchPath.ApplicationDirectory)]
-        internal static partial void Free(IntPtr self_ptr);
+        internal static partial void FreeHandle(IntPtr self_ptr);
     }
 
     public static double Calculate(int log2FftSize, int fftRepeat)
@@ -86,20 +84,20 @@ internal static partial class NativeRust
 
         Stopwatch stopwatch = Stopwatch.StartNew();
 
-	try
-	{
+        try
+        {
             using FftHandle fftHandle = new FftHandle();
-        
-	    for (i = 0; i < fftRepeat; i++)
+
+            for (i = 0; i < fftRepeat; i++)
             {
                 fftHandle.Fft(xy_out, xy, size);
             }
-	}
-	catch (Exception ex)
-	{
-	    Console.WriteLine($"Exception: {ex.Message}");
-	    return 0;
-	}
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Exception: {ex.Message}");
+            return 0;
+        }
 
         stopwatch.Stop();
 
@@ -111,7 +109,7 @@ internal static partial class NativeRust
 
         for (i = 0; i < 6; i++)
         {
-            Console.WriteLine(GetStringResource("ZeroTabOne")!, i, xy_out[i]);
+            Console.WriteLine($"{i}\t{xy_out[i]}");
         }
 
         return tpp;

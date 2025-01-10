@@ -2,11 +2,9 @@ using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 
-using static CSharpFftDemo.GlobalResourceManager;
-
 namespace CSharpFftDemo;
 
-internal static partial class NativeC
+internal static partial class FftNativeC
 {
     [StructLayout(LayoutKind.Explicit)]
     internal struct DoubleComplex(double real, double imaginary)
@@ -62,7 +60,7 @@ internal static partial class NativeC
 
         for (i = 0; i < 6; i++)
         {
-            Console.WriteLine(GetStringResource("ZeroTabOne")!, i, xy_out[i]);
+            Console.WriteLine($"{i}\t{xy_out[i]}");
         }
 
         return tpp;

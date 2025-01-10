@@ -1,6 +1,6 @@
 namespace CSharpFftDemo;
 
-internal static class Params
+internal static class Defaults
 {
     internal static int Log2FftSize = 12;
     internal static int FftRepeat = 20000;

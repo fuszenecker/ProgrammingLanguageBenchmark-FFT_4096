@@ -24,49 +24,62 @@ impl Fft {
         Box::into_raw(Box::new(fft))
     }
 
+    fn ptr_to_fft_reference(ptr: *mut Fft) -> &'static Fft {
+        unsafe {
+            NonNull::new(ptr).expect("Pointer to Fft is null.").as_ref()
+        }
+    }
+
+    fn ptr_to_array_reference(ptr: *mut Cf64, length: i32) -> &'static mut [Cf64] {
+        unsafe {
+            slice::from_raw_parts_mut(ptr, length as usize)
+        }
+    }
+
     #[inline(never)]
     #[no_mangle] 
     pub extern "C" fn fft(ptr: *mut Fft, xy_out_ptr: *mut Cf64, xy_in_ptr: *const Cf64, length: i32) {
         if !ptr.is_null() { 
-            unsafe { 
-                let non_null_ptr = NonNull::new(ptr).expect("Pointer to Fft is null.");
-                let this: &Fft = non_null_ptr.as_ref();
-                let xy_out: &mut [Cf64] = slice::from_raw_parts_mut(xy_out_ptr, length.try_into().unwrap());
-                let xy_in: &[Cf64] = slice::from_raw_parts(xy_in_ptr, length.try_into().unwrap());
+            let this: &Fft = Fft::ptr_to_fft_reference(ptr);
+            let xy_out: &mut [Cf64] = Fft::ptr_to_array_reference(xy_out_ptr, length);
+            let xy_in: &[Cf64] = Fft::ptr_to_array_reference(xy_in_ptr as *mut Cf64, length);
 
-                let log2point = xy_in.len().ilog2();
-                // if we use these assert_eq checks, the compiler can produce a faster code
-                assert_eq!(xy_out.len(), xy_in.len());
-                assert_eq!(xy_in.len(), 1 << log2point);
+            let log2point = xy_in.len().ilog2();
 
-                for (i, &xy_act) in xy_in.iter().enumerate() {
-                    xy_out[i.reverse_bits() >> (usize::count_zeros(0) - log2point)] = xy_act;
-                }
+            // if we use these assert_eq checks, the compiler can produce a faster code
+            assert_eq!(xy_out.len(), xy_in.len());
+            assert_eq!(xy_in.len(), 1 << log2point);
 
-                // here begins the Danielson-Lanczos section;
-                for l2pt in 0..log2point {
-                    let wphase_xy = this.phasevec[l2pt as usize];
-                    let mmax = 1 << l2pt;
-                    let mut w_xy = Complex::new(1.0, 0.0);
-                    for m in 0..mmax {
-                        for i in (m..xy_out.len()).step_by(mmax << 1) {
-                            let temp = w_xy * xy_out[i + mmax];
-                            xy_out[i + mmax] = xy_out[i] - temp;
-                            xy_out[i] += temp;
-                        }
-                        w_xy *= wphase_xy; // rotate
+            for (i, &xy_act) in xy_in.iter().enumerate() {
+                xy_out[i.reverse_bits() >> (usize::count_zeros(0) - log2point)] = xy_act;
+            }
+
+            // here begins the Danielson-Lanczos section;
+            for l2pt in 0..log2point {
+                let wphase_xy = this.phasevec[l2pt as usize];
+                let mmax = 1 << l2pt;
+                let mut w_xy = Complex::new(1.0, 0.0);
+
+                for m in 0..mmax {
+                    for i in (m..xy_out.len()).step_by(mmax << 1) {
+                        let temp = w_xy * xy_out[i + mmax];
+                        xy_out[i + mmax] = xy_out[i] - temp;
+                        xy_out[i] += temp;
                     }
+
+                    w_xy *= wphase_xy; // rotate
                 }
             }
         }
     }
-
 
     #[inline(never)]
     #[no_mangle] 
     pub extern "C" fn free(ptr: *mut Fft) {
         if !ptr.is_null() { 
             unsafe { 
+                // Box::from_raw will drop the object
+                // and free the memory.
                 let _ = Box::from_raw(ptr);
             }
         }
