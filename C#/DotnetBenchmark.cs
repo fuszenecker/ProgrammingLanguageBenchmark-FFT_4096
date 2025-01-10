@@ -81,7 +81,7 @@ public class DotnetBenchmark
 	fftHandle.Dispose();
     }
 
-    [Benchmark]
+    [Benchmark(Baseline = true)]
     public void Managed()
     {
         Fft.Calculate(Params.Log2FftSize, xyManaged, xyOutManaged);
@@ -93,7 +93,7 @@ public class DotnetBenchmark
         fftHandle.Fft(xyRust, xyOutRust, size);
     }
 
-    [Benchmark(Baseline = true)]
+    [Benchmark]
     public void C_DoubleComplex()
     {
         NativeC.Fft(Params.Log2FftSize, xyNative, xyOutNative);
