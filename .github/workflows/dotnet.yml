@@ -55,8 +55,9 @@ jobs:
       working-directory: C#
       run: make package
     - name: Publish artifact
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4.6.0
       with:
         name: fft-benchmark
         path: C#/*.deb
         retention-days: 3
+        overwrite: true
