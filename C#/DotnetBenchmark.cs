@@ -17,13 +17,13 @@ public class DotnetBenchmark
     private static readonly Complex[] xyManaged = new Complex[size];
     private static readonly Complex[] xyOutManaged = new Complex[size];
 
-    private readonly FftNative.DoubleComplex[] xyNative = new FftNative.DoubleComplex[size];
-    private readonly FftNative.DoubleComplex[] xyOutNative = new FftNative.DoubleComplex[size];
+    private readonly NativeC.DoubleComplex[] xyNative = new NativeC.DoubleComplex[size];
+    private readonly NativeC.DoubleComplex[] xyOutNative = new NativeC.DoubleComplex[size];
 
-    private readonly FftRust.FloatComplex[] xyRust = new FftRust.FloatComplex[size];
-    private readonly FftRust.FloatComplex[] xyOutRust = new FftRust.FloatComplex[size];
+    private readonly NativeRust.FloatComplex[] xyRust = new NativeRust.FloatComplex[size];
+    private readonly NativeRust.FloatComplex[] xyOutRust = new NativeRust.FloatComplex[size];
 
-    private FftRust.FftHandle fftHandle = null;
+    private NativeRust.FftHandle fftHandle = null;
 
     public static void Calculate()
     {
@@ -50,29 +50,29 @@ public class DotnetBenchmark
 
         for (i = 0; i < size / 2; i++)
         {
-            xyNative[i] = new FftNative.DoubleComplex(1.0f, 0.0f);
+            xyNative[i] = new NativeC.DoubleComplex(1.0f, 0.0f);
         }
 
         for (i = size / 2; i < size; i++)
         {
-            xyNative[i] = new FftNative.DoubleComplex(-1.0f, 0.0f);
+            xyNative[i] = new NativeC.DoubleComplex(-1.0f, 0.0f);
         }
 
         for (i = 0; i < size / 2; i++)
         {
-            xyRust[i] = new FftRust.FloatComplex(1.0f, 0.0f);
+            xyRust[i] = new NativeRust.FloatComplex(1.0f, 0.0f);
         }
 
         for (i = size / 2; i < size; i++)
         {
-            xyRust[i] = new FftRust.FloatComplex(-1.0f, 0.0f);
+            xyRust[i] = new NativeRust.FloatComplex(-1.0f, 0.0f);
         }
     }
 
     [GlobalSetup]
     public void Setup()
     {
-	fftHandle = new FftRust.FftHandle();
+	fftHandle = new NativeRust.FftHandle();
     }
 
     [GlobalCleanup]
@@ -96,6 +96,6 @@ public class DotnetBenchmark
     [Benchmark(Baseline = true)]
     public void C_DoubleComplex()
     {
-        FftNative.Fft(Params.Log2FftSize, xyNative, xyOutNative);
+        NativeC.Fft(Params.Log2FftSize, xyNative, xyOutNative);
     }
 }

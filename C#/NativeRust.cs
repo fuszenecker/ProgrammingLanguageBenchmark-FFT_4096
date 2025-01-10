@@ -6,7 +6,7 @@ using static CSharpFftDemo.GlobalResourceManager;
 
 namespace CSharpFftDemo;
 
-internal static partial class FftRust
+internal static partial class NativeRust
 {
     [StructLayout(LayoutKind.Explicit)]
     internal struct FloatComplex(float real, float imaginary)

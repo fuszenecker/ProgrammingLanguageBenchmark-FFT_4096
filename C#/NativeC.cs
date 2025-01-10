@@ -6,7 +6,7 @@ using static CSharpFftDemo.GlobalResourceManager;
 
 namespace CSharpFftDemo;
 
-internal static partial class FftNative
+internal static partial class NativeC
 {
     [StructLayout(LayoutKind.Explicit)]
     internal struct DoubleComplex(double real, double imaginary)
