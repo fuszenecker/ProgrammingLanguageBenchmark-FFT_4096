@@ -23,19 +23,20 @@ internal static partial class FftRust
         }
     }
 
-    partial class FftHandle : SafeHandle
+    public partial class FftHandle : SafeHandle
     {
         public FftHandle() : base(0, true)
         {
 	    Console.WriteLine("Creating new Rust FFT handle.");
             SetHandle(RustNew());
-	    Console.WriteLine("Rust FFT handle: {0:p}", handle);
+	    Console.WriteLine("Rust FFT handle: 0x{0:X}", handle);
         }
 
         protected override bool ReleaseHandle()
         {
-            // destroy_object(handle);
 	    Console.WriteLine("Disposing Rust FFT handle.");
+	    Free(handle);
+	    Console.WriteLine("Disposed Rust FFT handle.");
             return true;
         }
 
@@ -47,9 +48,9 @@ internal static partial class FftRust
 	    }
 	}
 
-        public void Fft(FloatComplex[] xy_out, FloatComplex[] xy_in)
+        public void Fft(FloatComplex[] xy_out, FloatComplex[] xy_in, int size)
 	{
-            Fft(handle, xy_out, xy_in);
+            Fft(handle, xy_out, xy_in, size);
 	}
 
         [LibraryImport(".//libfftr.so", EntryPoint = "new")]
@@ -58,7 +59,11 @@ internal static partial class FftRust
 
         [LibraryImport("./libfftr.so", EntryPoint = "fft")]
         [DefaultDllImportSearchPaths(DllImportSearchPath.ApplicationDirectory)]
-        internal static partial void Fft(IntPtr self_ptr, FloatComplex[] xy_out, FloatComplex[] xy_in);
+        internal static partial void Fft(IntPtr self_ptr, FloatComplex[] xy_out, FloatComplex[] xy_in, int length);
+
+	[LibraryImport("./libfftr.so", EntryPoint = "free")]
+        [DefaultDllImportSearchPaths(DllImportSearchPath.ApplicationDirectory)]
+        internal static partial void Free(IntPtr self_ptr);
     }
 
     public static double Calculate(int log2FftSize, int fftRepeat)
@@ -87,7 +92,7 @@ internal static partial class FftRust
         
 	    for (i = 0; i < fftRepeat; i++)
             {
-                fftHandle.Fft(xy_out, xy);
+                fftHandle.Fft(xy_out, xy, size);
             }
 	}
 	catch (Exception ex)

@@ -8,7 +8,7 @@ namespace CSharpFftDemo;
 internal sealed class Arguments
 {
     [Option(shortName: 'd', longName: "dotnet-benchmark", Default = false,
-        Required = false, HelpText = "Run the BenchmarkDotNet benchmark")]
+        Required = false, HelpText = "Run the BenchmarkDotNet benchmark (disabled all other benchmarks)")]
     public bool DotnetBenchmark { get; set; }
 
     [Option(shortName: 'm', longName: "managed", Default = true,
@@ -45,6 +45,12 @@ internal static class Benchmark
 
                     Params.Log2FftSize = opts.Log2FftSize;
                     Params.FftRepeat = opts.FftRepeat;
+
+		    if (opts.DotnetBenchmark)
+		    {
+		    	opts.ManagedBenchmark = false;
+			opts.NativeBenchmark = false;
+		    }
 
                     return Benchmarks(opts.DotnetBenchmark, opts.ManagedBenchmark, opts.NativeBenchmark);
                 }

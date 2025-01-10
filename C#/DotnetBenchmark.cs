@@ -20,6 +20,11 @@ public class DotnetBenchmark
     private readonly FftNative.DoubleComplex[] xyNative = new FftNative.DoubleComplex[size];
     private readonly FftNative.DoubleComplex[] xyOutNative = new FftNative.DoubleComplex[size];
 
+    private readonly FftRust.FloatComplex[] xyRust = new FftRust.FloatComplex[size];
+    private readonly FftRust.FloatComplex[] xyOutRust = new FftRust.FloatComplex[size];
+
+    private FftRust.FftHandle fftHandle = null;
+
     public static void Calculate()
     {
         Console.ForegroundColor = ConsoleColor.Yellow;
@@ -52,6 +57,28 @@ public class DotnetBenchmark
         {
             xyNative[i] = new FftNative.DoubleComplex(-1.0f, 0.0f);
         }
+
+        for (i = 0; i < size / 2; i++)
+        {
+            xyRust[i] = new FftRust.FloatComplex(1.0f, 0.0f);
+        }
+
+        for (i = size / 2; i < size; i++)
+        {
+            xyRust[i] = new FftRust.FloatComplex(-1.0f, 0.0f);
+        }
+    }
+
+    [GlobalSetup]
+    public void Setup()
+    {
+	fftHandle = new FftRust.FftHandle();
+    }
+
+    [GlobalCleanup]
+    public void Cleanup()
+    {
+	fftHandle.Dispose();
     }
 
     [Benchmark]
@@ -60,8 +87,14 @@ public class DotnetBenchmark
         Fft.Calculate(Params.Log2FftSize, xyManaged, xyOutManaged);
     }
 
+    [Benchmark]
+    public void Rust_FloatComplex()
+    {
+        fftHandle.Fft(xyRust, xyOutRust, size);
+    }
+
     [Benchmark(Baseline = true)]
-    public void Native()
+    public void C_DoubleComplex()
     {
         FftNative.Fft(Params.Log2FftSize, xyNative, xyOutNative);
     }

@@ -26,13 +26,13 @@ impl Fft {
 
     #[inline(never)]
     #[no_mangle] 
-    pub extern "C" fn fft(ptr: *mut Fft, xy_out_ptr: *mut Cf32, xy_in_ptr: *const Cf32) {
+    pub extern "C" fn fft(ptr: *mut Fft, xy_out_ptr: *mut Cf32, xy_in_ptr: *const Cf32, length: i32) {
         if !ptr.is_null() { 
             unsafe { 
                 let non_null_ptr = NonNull::new(ptr).expect("Pointer to Fft is null.");
                 let this: &Fft = non_null_ptr.as_ref();
-                let xy_out: &mut [Cf32] = slice::from_raw_parts_mut(xy_out_ptr, 4096);
-                let xy_in: &[Cf32] = slice::from_raw_parts(xy_in_ptr, 4096);
+                let xy_out: &mut [Cf32] = slice::from_raw_parts_mut(xy_out_ptr, length.try_into().unwrap());
+                let xy_in: &[Cf32] = slice::from_raw_parts(xy_in_ptr, length.try_into().unwrap());
 
                 let log2point = xy_in.len().ilog2();
                 // if we use these assert_eq checks, the compiler can produce a faster code
@@ -57,6 +57,17 @@ impl Fft {
                         w_xy *= wphase_xy; // rotate
                     }
                 }
+            }
+        }
+    }
+
+
+    #[inline(never)]
+    #[no_mangle] 
+    pub extern "C" fn free(ptr: *mut Fft) {
+        if !ptr.is_null() { 
+            unsafe { 
+                let _ = Box::from_raw(ptr);
             }
         }
     }
