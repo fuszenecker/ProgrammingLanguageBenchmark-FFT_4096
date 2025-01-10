@@ -20,8 +20,8 @@ public class DotnetBenchmark
     private readonly NativeC.DoubleComplex[] xyNative = new NativeC.DoubleComplex[size];
     private readonly NativeC.DoubleComplex[] xyOutNative = new NativeC.DoubleComplex[size];
 
-    private readonly NativeRust.FloatComplex[] xyRust = new NativeRust.FloatComplex[size];
-    private readonly NativeRust.FloatComplex[] xyOutRust = new NativeRust.FloatComplex[size];
+    private readonly NativeRust.DoubleComplex[] xyRust = new NativeRust.DoubleComplex[size];
+    private readonly NativeRust.DoubleComplex[] xyOutRust = new NativeRust.DoubleComplex[size];
 
     private NativeRust.FftHandle fftHandle = null;
 
@@ -60,12 +60,12 @@ public class DotnetBenchmark
 
         for (i = 0; i < size / 2; i++)
         {
-            xyRust[i] = new NativeRust.FloatComplex(1.0f, 0.0f);
+            xyRust[i] = new NativeRust.DoubleComplex(1.0f, 0.0f);
         }
 
         for (i = size / 2; i < size; i++)
         {
-            xyRust[i] = new NativeRust.FloatComplex(-1.0f, 0.0f);
+            xyRust[i] = new NativeRust.DoubleComplex(-1.0f, 0.0f);
         }
     }
 
@@ -88,7 +88,7 @@ public class DotnetBenchmark
     }
 
     [Benchmark]
-    public void Rust_FloatComplex()
+    public void Rust_DoubleComplex()
     {
         fftHandle.Fft(xyRust, xyOutRust, size);
     }

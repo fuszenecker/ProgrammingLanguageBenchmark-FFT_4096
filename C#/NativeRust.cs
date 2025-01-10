@@ -9,13 +9,13 @@ namespace CSharpFftDemo;
 internal static partial class NativeRust
 {
     [StructLayout(LayoutKind.Explicit)]
-    internal struct FloatComplex(float real, float imaginary)
+    internal struct DoubleComplex(double real, double imaginary)
     {
         [FieldOffset(0)]
-        public float Real = real;
+        public double Real = real;
 
-        [FieldOffset(4)]
-        public float Imaginary = imaginary;
+        [FieldOffset(8)]
+        public double Imaginary = imaginary;
 
         public override readonly string ToString()
         {
@@ -48,7 +48,7 @@ internal static partial class NativeRust
 	    }
 	}
 
-        public void Fft(FloatComplex[] xy_out, FloatComplex[] xy_in, int size)
+        public void Fft(DoubleComplex[] xy_out, DoubleComplex[] xy_in, int size)
 	{
             Fft(handle, xy_out, xy_in, size);
 	}
@@ -59,7 +59,7 @@ internal static partial class NativeRust
 
         [LibraryImport("./libfftr.so", EntryPoint = "fft")]
         [DefaultDllImportSearchPaths(DllImportSearchPath.ApplicationDirectory)]
-        internal static partial void Fft(IntPtr self_ptr, FloatComplex[] xy_out, FloatComplex[] xy_in, int length);
+        internal static partial void Fft(IntPtr self_ptr, DoubleComplex[] xy_out, DoubleComplex[] xy_in, int length);
 
 	[LibraryImport("./libfftr.so", EntryPoint = "free")]
         [DefaultDllImportSearchPaths(DllImportSearchPath.ApplicationDirectory)]
@@ -71,17 +71,17 @@ internal static partial class NativeRust
         int i;
         int size = 1 << log2FftSize;
 
-        FloatComplex[] xy = new FloatComplex[size];
-        FloatComplex[] xy_out = new FloatComplex[xy.Length];
+        DoubleComplex[] xy = new DoubleComplex[size];
+        DoubleComplex[] xy_out = new DoubleComplex[xy.Length];
 
         for (i = 0; i < size / 2; i++)
         {
-            xy[i] = new FloatComplex(1.0f, 0.0f);
+            xy[i] = new DoubleComplex(1.0f, 0.0f);
         }
 
         for (i = size / 2; i < size; i++)
         {
-            xy[i] = new FloatComplex(-1.0f, 0.0f);
+            xy[i] = new DoubleComplex(-1.0f, 0.0f);
         }
 
         Stopwatch stopwatch = Stopwatch.StartNew();

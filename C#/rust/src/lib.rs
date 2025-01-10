@@ -2,11 +2,11 @@ use num_complex::Complex;
 use std::ptr::NonNull;
 use std::slice;
 
-pub type Cf32 = Complex<f32>;
+pub type Cf64 = Complex<f64>;
 
 #[repr(C)]
 pub struct Fft {
-    phasevec: [Cf32; 32],
+    phasevec: [Cf64; 32],
 }
 
 // Public function
@@ -18,7 +18,7 @@ impl Fft {
             phasevec: [Complex::new(0.0, 0.0); PHLEN],
         };
         for i in 0..PHLEN {
-            let phase = -2.0 * std::f32::consts::PI / 2.0_f32.powi(i as i32 + 1);
+            let phase = -2.0 * std::f64::consts::PI / 2.0_f64.powi(i as i32 + 1);
             fft.phasevec[i] = Complex::new(phase.cos(), phase.sin());
         }
         Box::into_raw(Box::new(fft))
@@ -26,13 +26,13 @@ impl Fft {
 
     #[inline(never)]
     #[no_mangle] 
-    pub extern "C" fn fft(ptr: *mut Fft, xy_out_ptr: *mut Cf32, xy_in_ptr: *const Cf32, length: i32) {
+    pub extern "C" fn fft(ptr: *mut Fft, xy_out_ptr: *mut Cf64, xy_in_ptr: *const Cf64, length: i32) {
         if !ptr.is_null() { 
             unsafe { 
                 let non_null_ptr = NonNull::new(ptr).expect("Pointer to Fft is null.");
                 let this: &Fft = non_null_ptr.as_ref();
-                let xy_out: &mut [Cf32] = slice::from_raw_parts_mut(xy_out_ptr, length.try_into().unwrap());
-                let xy_in: &[Cf32] = slice::from_raw_parts(xy_in_ptr, length.try_into().unwrap());
+                let xy_out: &mut [Cf64] = slice::from_raw_parts_mut(xy_out_ptr, length.try_into().unwrap());
+                let xy_in: &[Cf64] = slice::from_raw_parts(xy_in_ptr, length.try_into().unwrap());
 
                 let log2point = xy_in.len().ilog2();
                 // if we use these assert_eq checks, the compiler can produce a faster code
