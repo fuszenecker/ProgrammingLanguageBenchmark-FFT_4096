@@ -67,7 +67,8 @@ internal static class Benchmark
     private static int Benchmarks(bool dotnetBenchmark, bool managedBenchmark, bool nativeBenchmark)
     {
         double? managedElapsedMillisecond = null;
-        double? nativeElapsedMillisecond = null;
+        double? nativeCElapsedMillisecond = null;
+        double? nativeRustElapsedMillisecond = null;
 
         if (dotnetBenchmark)
         {
@@ -101,8 +102,23 @@ internal static class Benchmark
                 Console.WriteLine(GetStringResource("NativeText"));
                 Console.ForegroundColor = ConsoleColor.Gray;
 
-                nativeElapsedMillisecond = FftRust.Calculate(Params.Log2FftSize, Params.FftRepeat);
-                //nativeElapsedMillisecond = FftNative.Calculate(Params.Log2FftSize, Params.FftRepeat);
+                nativeCElapsedMillisecond = FftNative.Calculate(Params.Log2FftSize, Params.FftRepeat);
+            }
+            catch (DllNotFoundException e)
+            {
+                Console.WriteLine(GetStringResource("CanotRunNative")!, e.Message);
+                Console.WriteLine(GetStringResource("HaveYouCompiledNative"));
+                return 1;
+            }
+
+            try
+            {
+                // Benchmark
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine(GetStringResource("NativeText"));
+                Console.ForegroundColor = ConsoleColor.Gray;
+
+                nativeRustElapsedMillisecond = FftRust.Calculate(Params.Log2FftSize, Params.FftRepeat);
             }
             catch (DllNotFoundException e)
             {
@@ -112,11 +128,13 @@ internal static class Benchmark
             }
         }
 
-        if (managedElapsedMillisecond.HasValue && nativeElapsedMillisecond.HasValue)
+        if (managedElapsedMillisecond.HasValue && nativeCElapsedMillisecond.HasValue && nativeRustElapsedMillisecond.HasValue)
         {
             Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine($"Native Ratio: {managedElapsedMillisecond / nativeElapsedMillisecond:0.####}");
-            Console.WriteLine($"Native Diff%: {managedElapsedMillisecond / nativeElapsedMillisecond - 1:0.##%}");
+            Console.WriteLine($"Native C Ratio    : {managedElapsedMillisecond / nativeCElapsedMillisecond:0.####}");
+            Console.WriteLine($"Native C Diff%    : {managedElapsedMillisecond / nativeCElapsedMillisecond - 1:0.##%}");
+            Console.WriteLine($"Native Rust Ratio : {managedElapsedMillisecond / nativeRustElapsedMillisecond:0.####}");
+            Console.WriteLine($"Native Rust Diff% : {managedElapsedMillisecond / nativeRustElapsedMillisecond - 1:0.##%}");
             Console.ForegroundColor = ConsoleColor.Gray;
         }
 
