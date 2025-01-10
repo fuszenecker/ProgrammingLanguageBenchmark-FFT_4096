@@ -21,7 +21,7 @@ internal static partial class FftNativeRust
         }
     }
 
-    internal partial class FftHandle : SafeHandle
+    internal sealed partial class FftHandle : SafeHandle
     {
         public FftHandle() : base(0, true)
         {

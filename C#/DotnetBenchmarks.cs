@@ -12,18 +12,16 @@ namespace CSharpFftDemo;
 public class DotnetBenchmarks
 {
     [Params(8, 9, 10, 11, 12)]
-    public static int Log2FftSize { get; set; }
+    public int Log2FftSize { get; set; }
 
-    private static readonly int size = 1 << Log2FftSize;
+    private Complex[]? xyManaged;
+    private Complex[]? xyOutManaged;
 
-    private static readonly Complex[] xyManaged = new Complex[size];
-    private static readonly Complex[] xyOutManaged = new Complex[size];
+    private FftNativeC.DoubleComplex[]? xyNative;
+    private FftNativeC.DoubleComplex[]? xyOutNative;
 
-    private readonly FftNativeC.DoubleComplex[] xyNative = new FftNativeC.DoubleComplex[size];
-    private readonly FftNativeC.DoubleComplex[] xyOutNative = new FftNativeC.DoubleComplex[size];
-
-    private readonly FftNativeRust.DoubleComplex[] xyRust = new FftNativeRust.DoubleComplex[size];
-    private readonly FftNativeRust.DoubleComplex[] xyOutRust = new FftNativeRust.DoubleComplex[size];
+    private FftNativeRust.DoubleComplex[]? xyRust;
+    private FftNativeRust.DoubleComplex[]? xyOutRust;
 
     private FftNativeRust.FftHandle? fftHandle;
 
@@ -36,12 +34,14 @@ public class DotnetBenchmarks
         _ = BenchmarkRunner.Run<DotnetBenchmarks>();
     }
 
- 
-
     [GlobalSetup]
     public void Setup()
     {
         int i;
+        int size = 1 << Log2FftSize;
+
+        xyManaged = new Complex[size];
+        xyOutManaged = new Complex[size];
 
         for (i = 0; i < size / 2; i++)
         {
@@ -53,6 +53,9 @@ public class DotnetBenchmarks
             xyManaged[i] = new Complex(-1.0, 0.0);
         }
 
+        xyNative = new FftNativeC.DoubleComplex[size];
+        xyOutNative = new FftNativeC.DoubleComplex[size];
+
         for (i = 0; i < size / 2; i++)
         {
             xyNative[i] = new FftNativeC.DoubleComplex(1.0f, 0.0f);
@@ -62,6 +65,9 @@ public class DotnetBenchmarks
         {
             xyNative[i] = new FftNativeC.DoubleComplex(-1.0f, 0.0f);
         }
+
+        xyRust = new FftNativeRust.DoubleComplex[size];
+        xyOutRust = new FftNativeRust.DoubleComplex[size];
 
         for (i = 0; i < size / 2; i++)
         {
@@ -91,12 +97,12 @@ public class DotnetBenchmarks
     [Benchmark]
     public void RustDoubleComplex()
     {
-        fftHandle?.Fft(xyRust, xyOutRust, 1 << Log2FftSize);
+        fftHandle?.Fft(xyRust!, xyOutRust!, 1 << Log2FftSize);
     }
 
     [Benchmark]
     public void CDoubleComplex()
     {
-        FftNativeC.Fft(Log2FftSize, xyNative, xyOutNative);
+        FftNativeC.Fft(Log2FftSize, xyNative!, xyOutNative!);
     }
 }
