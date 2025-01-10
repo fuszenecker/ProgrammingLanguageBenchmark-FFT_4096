@@ -95,7 +95,8 @@ internal static class Benchmark
                 Console.WriteLine(GetStringResource("NativeText"));
                 Console.ForegroundColor = ConsoleColor.Gray;
 
-                nativeElapsedMillisecond = FftNative.Calculate(Params.Log2FftSize, Params.FftRepeat);
+                nativeElapsedMillisecond = FftRust.Calculate(Params.Log2FftSize, Params.FftRepeat);
+                //nativeElapsedMillisecond = FftNative.Calculate(Params.Log2FftSize, Params.FftRepeat);
             }
             catch (DllNotFoundException e)
             {
