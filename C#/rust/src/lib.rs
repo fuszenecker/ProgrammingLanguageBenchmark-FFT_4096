@@ -1,5 +1,4 @@
 use num_complex::Complex;
-use std::ptr::NonNull;
 use std::slice;
 
 pub type Cf64 = Complex<f64>;
@@ -30,7 +29,7 @@ impl Fft {
     #[inline(always)]
     fn ptr_to_fft_reference(ptr: *mut Fft) -> &'static Fft {
         unsafe {
-            NonNull::new(ptr).expect("Pointer to Fft is null.").as_ref()
+            ptr.as_ref().unwrap()
         }
     }
 
