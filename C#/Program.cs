@@ -16,7 +16,7 @@ internal static class Benchmark
         Console.WriteLine($"GC 1 Collection Count: {GC.CollectionCount(1)}");
         Console.WriteLine($"GC 2 Collection Count: {GC.CollectionCount(2)}");
         Console.WriteLine($"GC Total Pause Duration: {GC.GetTotalPauseDuration()}");
-        Console.WriteLine($"GC Pause Time Percentage: {GC.GetGCMemoryInfo().PauseTimePercentage:p}");
+        Console.WriteLine($"GC Pause Time Percentage: {GC.GetGCMemoryInfo().PauseTimePercentage:#,##0.00}%");
 
         return result;
     }
