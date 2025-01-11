@@ -9,9 +9,10 @@ namespace CSharpFftDemo;
 [MinColumn, MaxColumn, MeanColumn, MedianColumn]
 [MemoryDiagnoser]
 [DisassemblyDiagnoser]
+[ShortRunJob]
 public class DotnetBenchmarks
 {
-    [Params(8, 9, 10, 11, 12)]
+    [Params(10, 11, 12, 13, 14)]
     public int Log2FftSize { get; set; }
 
     private Complex[]? xyManaged;

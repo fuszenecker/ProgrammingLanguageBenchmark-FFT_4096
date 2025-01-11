@@ -12,24 +12,29 @@ pub struct Fft {
 // Public function
 impl Fft {
     #[no_mangle] 
-    pub extern "C" fn new() -> *const Fft {
+    pub extern "C" fn new() -> *mut Fft {
         const PHLEN: usize = 32;
+
         let mut fft = Fft {
             phasevec: [Complex::new(0.0, 0.0); PHLEN],
         };
+
         for i in 0..PHLEN {
             let phase = -2.0 * std::f64::consts::PI / 2.0_f64.powi(i as i32 + 1);
             fft.phasevec[i] = Complex::new(phase.cos(), phase.sin());
         }
+
         Box::into_raw(Box::new(fft))
     }
 
+    #[inline(always)]
     fn ptr_to_fft_reference(ptr: *mut Fft) -> &'static Fft {
         unsafe {
             NonNull::new(ptr).expect("Pointer to Fft is null.").as_ref()
         }
     }
 
+    #[inline(always)]
     fn ptr_to_array_reference(ptr: *mut Cf64, length: i32) -> &'static mut [Cf64] {
         unsafe {
             slice::from_raw_parts_mut(ptr, length as usize)
