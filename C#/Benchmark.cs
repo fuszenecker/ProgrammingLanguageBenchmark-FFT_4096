@@ -1,5 +1,4 @@
 ﻿using System;
-using CommandLine;
 
 using static CSharpFftDemo.GlobalResourceManager;
 
@@ -7,28 +6,73 @@ namespace CSharpFftDemo;
 
 internal sealed class Arguments
 {
-    [Option(shortName: 'd', longName: "dotnet-benchmark", Default = false,
-        Required = false, HelpText = "Run the BenchmarkDotNet benchmark")]
-    public bool DotnetBenchmark { get; set; }
+    public bool DotnetBenchmark { get; set; } = false;
+    public bool ManagedBenchmark { get; set; } = true;
+    public bool NativeBenchmark { get; set; } = false;
+    public int FftRepeat { get; set; } = 20000;
+    public int Log2FftSize { get; set; } = 12;
+}
 
-    [Option(shortName: 'm', longName: "managed", Default = true,
-        Required = false, HelpText = "Run the .NET managed benchmark")]
-    public bool ManagedBenchmark { get; set; }
-
-    [Option(shortName: 'n', longName: "native", Default = false,
-        Required = false, HelpText = "Run the native (C-fast_double) benchmark")]
-    public bool NativeBenchmark { get; set; }
-
-    [Option(shortName: 'r', longName: "repeat", Default = 20000,
-        Required = false, HelpText = "Number of iterations, e.g. 20000.")]
-    public int FftRepeat { get; set; }
-
-    [Option(shortName: 's', longName: "size", Default = 12,
-        Required = false, HelpText = "Log2 of the buffer size, e.g. 12 for 4096 samples.")]
-    public int Log2FftSize { get; set; }
-
-    public Arguments()
+internal static class ArgumentParser
+{
+    public static Arguments Parse(string[] args)
     {
+        var arguments = new Arguments();
+
+        for (int i = 0; i < args.Length; i++)
+        {
+            string arg = args[i];
+
+            if (arg == "-d" || arg == "--dotnet-benchmark")
+            {
+                arguments.DotnetBenchmark = true;
+            }
+            else if (arg == "-m" || arg == "--managed")
+            {
+                arguments.ManagedBenchmark = true;
+            }
+            else if (arg == "-n" || arg == "--native")
+            {
+                arguments.NativeBenchmark = true;
+            }
+            else if (arg == "-r" || arg == "--repeat")
+            {
+                if (i + 1 < args.Length && int.TryParse(args[i + 1], out int repeat))
+                {
+                    arguments.FftRepeat = repeat;
+                    i++;
+                }
+            }
+            else if (arg == "-s" || arg == "--size")
+            {
+                if (i + 1 < args.Length && int.TryParse(args[i + 1], out int size))
+                {
+                    arguments.Log2FftSize = size;
+                    i++;
+                }
+            }
+            else if (arg == "-h" || arg == "--help")
+            {
+                PrintHelp();
+                Environment.Exit(0);
+            }
+        }
+
+        return arguments;
+    }
+
+    private static void PrintHelp()
+    {
+        Console.WriteLine("FFT Benchmark Tool");
+        Console.WriteLine("Usage: fft-benchmark [options]");
+        Console.WriteLine();
+        Console.WriteLine("Options:");
+        Console.WriteLine("  -d, --dotnet-benchmark    Run the BenchmarkDotNet benchmark");
+        Console.WriteLine("  -m, --managed              Run the .NET managed benchmark (default)");
+        Console.WriteLine("  -n, --native               Run the native (C-fast_double) benchmark");
+        Console.WriteLine("  -r, --repeat <N>           Number of iterations (default: 20000)");
+        Console.WriteLine("  -s, --size <N>             Log2 of buffer size (default: 12 for 4096 samples)");
+        Console.WriteLine("  -h, --help                 Show this help message");
     }
 }
 
@@ -36,26 +80,21 @@ internal static class Benchmark
 {
     public static int Main(string[] args)
     {
-        return Parser.Default.ParseArguments<Arguments>(args)
-            .MapResult(static (Arguments opts) =>
-            {
-                try
-                {
-                    Console.WriteLine($"Log2FftSize: {opts.Log2FftSize}, Repeat: {opts.FftRepeat}");
+        try
+        {
+            var opts = ArgumentParser.Parse(args);
+            Console.WriteLine($"Log2FftSize: {opts.Log2FftSize}, Repeat: {opts.FftRepeat}");
 
-                    Params.Log2FftSize = opts.Log2FftSize;
-                    Params.FftRepeat = opts.FftRepeat;
+            Params.Log2FftSize = opts.Log2FftSize;
+            Params.FftRepeat = opts.FftRepeat;
 
-                    return Benchmarks(opts.DotnetBenchmark, opts.ManagedBenchmark, opts.NativeBenchmark);
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(GetStringResource("UnhandledExceptionText")!, e.Message);
-                    return -4;
-                }
-            },
-            errs => -1
-        );
+            return Benchmarks(opts.DotnetBenchmark, opts.ManagedBenchmark, opts.NativeBenchmark);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(GetStringResource("UnhandledExceptionText")!, e.Message);
+            return -4;
+        }
     }
 
     private static int Benchmarks(bool dotnetBenchmark, bool managedBenchmark, bool nativeBenchmark)
