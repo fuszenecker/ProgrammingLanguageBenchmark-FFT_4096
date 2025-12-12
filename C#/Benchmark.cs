@@ -6,9 +6,9 @@ namespace CSharpFftDemo;
 
 internal sealed class Arguments
 {
-    public bool DotnetBenchmark { get; set; } = false;
+    public bool DotnetBenchmark { get; set; }
     public bool ManagedBenchmark { get; set; } = true;
-    public bool NativeBenchmark { get; set; } = false;
+    public bool NativeBenchmark { get; set; }
     public int FftRepeat { get; set; } = 20000;
     public int Log2FftSize { get; set; } = 12;
 }
