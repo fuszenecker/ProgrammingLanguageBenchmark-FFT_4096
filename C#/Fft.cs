@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Numerics;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace CSharpFftDemo;
 
@@ -47,6 +49,9 @@ internal static class Fft
     public static unsafe void Calculate(int Log2FftSize, Span<Complex> xyIn, Span<Complex> xyOut)
     {
         int n = 1 << Log2FftSize;
+        // Use refs to avoid repeated Span indexing/bounds checks
+        ref Complex inRef = ref MemoryMarshal.GetReference(xyIn);
+        ref Complex outRef = ref MemoryMarshal.GetReference(xyOut);
 
         for (int i = 0; i < n; i++)
         {
@@ -59,7 +64,7 @@ internal static class Fft
             brev = (brev >> 16) | (brev << 16);
 
             brev >>= 32 - Log2FftSize;
-            xyOut[(int)brev] = xyIn[i];
+            Unsafe.Add(ref outRef, (int)brev) = Unsafe.Add(ref inRef, i);
         }
 
         int l2pt = 0;
@@ -69,18 +74,25 @@ internal static class Fft
         {
             int istep = mmax << 1;
             Complex wphase_XY = phasevec[l2pt++];
-            Complex w_XY = s_one;
+            Complex w_XY = Complex.One;
 
             for (int m = 0; m < mmax; m++)
             {
                 for (int i = m; i < n; i += istep)
                 {
-                    Complex tempXY = w_XY * xyOut[i + mmax];
+                    // Access references for the two elements to avoid bounds checks
+                    ref Complex aRef = ref Unsafe.Add(ref outRef, i);
+                    ref Complex bRef = ref Unsafe.Add(ref outRef, i + mmax);
 
-                    xyOut[i + mmax] = xyOut[i] - tempXY;
-                    xyOut[i] += tempXY;
+                    // Compute temp = w_XY * bRef (preserve original operation order)
+                    Complex tempXY = w_XY * bRef;
+
+                    // Perform updates in same order as original
+                    bRef = aRef - tempXY;
+                    aRef = aRef + tempXY;
                 }
 
+                // Update w_XY exactly once per m (preserve original semantics)
                 w_XY *= wphase_XY;
             }
 
