@@ -1,7 +1,10 @@
 using System;
 using System.Numerics;
 using BenchmarkDotNet.Attributes;
+using BenchmarkDotNet.Columns;
+using BenchmarkDotNet.Configs;
 using BenchmarkDotNet.Diagnosers;
+using BenchmarkDotNet.Loggers;
 using BenchmarkDotNet.Running;
 
 namespace CSharpFftDemo;
@@ -11,6 +14,16 @@ namespace CSharpFftDemo;
 [DisassemblyDiagnoser]
 public class DotnetBenchmark
 {
+    private sealed class Config : ManualConfig
+    {
+        public Config()
+        {
+            AddLogger(ConsoleLogger.Default);
+            AddColumnProvider(DefaultColumnProviders.Instance);
+            WithOptions(ConfigOptions.DisableOptimizationsValidator);
+        }
+    }
+
     public static int Log2FftSize { get; set; }
 
     private int size;
@@ -28,7 +41,7 @@ public class DotnetBenchmark
         Console.WriteLine("---- BENCHMARK.NET ----");
         Console.ForegroundColor = ConsoleColor.Gray;
 
-        _ = BenchmarkRunner.Run<DotnetBenchmark>();
+        _ = BenchmarkRunner.Run<DotnetBenchmark>(new Config());
     }
 
     [GlobalSetup]

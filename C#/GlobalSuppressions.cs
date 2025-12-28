@@ -10,9 +10,5 @@ using System.Diagnostics.CodeAnalysis;
 [assembly: SuppressMessage("Maintainability", "CA1515:Consider making public types internal", Justification = "<Pending>", Scope = "type", Target = "~T:CSharpFftDemo.DotnetBenchmark")]
 [assembly: SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "<Pending>", Scope = "member", Target = "~M:CSharpFftDemo.DotnetBenchmark.Managed")]
 [assembly: SuppressMessage("Performance", "CA1812:Avoid uninstantiated internal classes", Justification = "Reason for suppression", Scope = "module")]
-[assembly: SuppressMessage("Globalization", "CA1303:Do not pass literals as localized parameters", Justification = "<Pending>", Scope = "member", Target = "~M:CSharpFftDemo.ArgumentParser.PrintHelp")]
-[assembly: SuppressMessage("Globalization", "CA1303:Do not pass literals as localized parameters", Justification = "<Pending>", Scope = "member", Target = "~M:CSharpFftDemo.Benchmark.Benchmarks(System.Boolean,System.Boolean,System.Boolean)~System.Int32")]
-[assembly: SuppressMessage("Globalization", "CA1303:Do not pass literals as localized parameters", Justification = "<Pending>", Scope = "member", Target = "~M:CSharpFftDemo.Benchmark.Main(System.String[])~System.Int32")]
-[assembly: SuppressMessage("Globalization", "CA1303:Do not pass literals as localized parameters", Justification = "<Pending>", Scope = "member", Target = "~M:CSharpFftDemo.DotnetBenchmark.Calculate")]
-[assembly: SuppressMessage("Globalization", "CA1303:Do not pass literals as localized parameters", Justification = "<Pending>", Scope = "member", Target = "~M:CSharpFftDemo.FftManaged.Calculate(System.Int32,System.Int32)~System.Double")]
-[assembly: SuppressMessage("Globalization", "CA1303:Do not pass literals as localized parameters", Justification = "<Pending>", Scope = "member", Target = "~M:CSharpFftDemo.FftNative.Calculate(System.Int32,System.Int32)~System.Double")]
+[assembly: SuppressMessage("Globalization", "CA1303:Do not pass literals as localized parameters", Justification = "Benchmark tool does not require localization")]
+

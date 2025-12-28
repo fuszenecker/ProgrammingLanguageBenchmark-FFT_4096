@@ -92,6 +92,7 @@ internal static class Benchmark
         }
     }
 
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Globalization", "CA1303:Do not pass literals as localized parameters", Justification = "Console output is not localized.")]
     private static int Benchmarks(Arguments opts)
     {
         double? managedElapsedMillisecond = null;
