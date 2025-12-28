@@ -15,7 +15,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
+    - name: Install stable toolchain
+      uses: dtolnay/rust-toolchain@stable
     - name: Build
       working-directory: other_tests/Rust-tests/Rust
       run: cargo build --verbose
