@@ -4,7 +4,7 @@ using System.Numerics;
 
 namespace CSharpFftDemo;
 
-internal static class FftManaged
+internal static partial class FftManaged
 {
     public static double Calculate(int log2FftSize, int fftRepeat)
     {
@@ -28,7 +28,7 @@ internal static class FftManaged
 
         for (i = 0; i < fftRepeat; i++)
         {
-            Fft.Calculate(log2FftSize, xy, xy_out);
+            Calculate(log2FftSize, xy, xy_out);
         }
 
         stopwatch.Stop();
@@ -67,7 +67,7 @@ internal static class FftManaged
         // JIT warm up ... possible gives more speed
         for (i = 0; i < fftRepeat; i++)
         {
-            Fft.Calculate(log2FftSize, xy, xy_out);
+            Calculate(log2FftSize, xy, xy_out);
         }
     }
 }

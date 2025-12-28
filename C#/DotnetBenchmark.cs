@@ -100,7 +100,7 @@ public class DotnetBenchmark : IDisposable
     [Benchmark]
     public void Managed()
     {
-        Fft.Calculate(Log2FftSize, xyManaged, xyOutManaged);
+        FftManaged.Calculate(Log2FftSize, xyManaged, xyOutManaged);
     }
 
     [Benchmark(Baseline = true)]

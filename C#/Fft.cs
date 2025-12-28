@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 
 namespace CSharpFftDemo;
 
-internal static class Fft
+internal static partial class FftManaged
 {
     private static readonly Complex[] phasevec = [
             new Complex(-1, -1.22464679914735E-16),
