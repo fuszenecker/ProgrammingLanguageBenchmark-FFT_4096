@@ -1,8 +1,8 @@
 Package: fft-benchmark
-Version: 1.9.1.0
+Version: %%VERSION%%
 Section: base
 Priority: optional
 Architecture: amd64
-Depends: libc6, libgcc-s1, libgssapi-krb5-2, libicu74, libssl3, libstdc++6, zlib1g
+Depends: libc6, libgcc-s1, libgssapi-krb5-2, libicu76, libssl3, libstdc++6, zlib1g
 Maintainer: Robert Fuszenecker <robert.fuszenecker@outlook.com>
 Description: The FFT benchmark from Zsolt Krüpl

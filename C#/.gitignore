@@ -4,6 +4,7 @@ project.lock.json
 **/*.deb
 **/*.rpm
 packaging/opt
+packaging/DEBIAN/control
 dist-*
 **/*.zip
 **/*.o

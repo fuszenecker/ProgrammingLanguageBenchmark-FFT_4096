@@ -1,7 +1,7 @@
 TARGET=./dist/fft-benchmark
-ARCH=x64 # 	arm, arm64, please consult: https://docs.microsoft.com/en-us/dotnet/core/rid-catalog#linux-rids 
+ARCH=x64
 DESTDIR=dist
-VERSION=2.0.0
+VERSION=1.9.1.2
 
 CC=gcc
 CFLAGS =-Wall -O2 -funroll-all-loops -fPIC
@@ -37,10 +37,13 @@ clean:
 	rm -fr $(TARGET) bin obj *.o *.so BenchmarkDotNet.Artifacts dist *.deb
 
 package:
-	dotnet msbuild /t:package /p:Arch=$(ARCH) -p:VersionPrefix=$(VERSION)
+	sed -e 's/%%VERSION%%/$(VERSION)/g' packaging/DEBIAN/control.in > packaging/DEBIAN/control
+	dotnet publish -c Release -r linux-$(ARCH) --self-contained -o packaging/opt/fft-benchmark -p:PublishTrimmed=False -p:VersionPrefix=$(VERSION) fft-benchmark.csproj
+	dpkg-deb --build packaging fft-benchmark-$(VERSION)-$(ARCH).deb
 
 docker:
-	dotnet msbuild /t:docker /p:Arch=$(ARCH) -p:VersionPrefix=$(VERSION)
+    dotnet publish -c Release -o dist --self-contained -r linux-$(ARCH) -p:PublishTrimmed=False -p:VersionPrefix=$(VERSION) fft-benchmark.csproj
+    docker build -t fft-benchmark:$(VERSION) .
 
 PROG=$(TARGET)
 test:
