@@ -2,8 +2,6 @@ using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 
-using static CSharpFftDemo.GlobalResourceManager;
-
 namespace CSharpFftDemo;
 
 internal static partial class FftNative
@@ -62,7 +60,7 @@ internal static partial class FftNative
 
         for (i = 0; i < 6; i++)
         {
-            Console.WriteLine(GetStringResource("ZeroTabOne")!, i, xy_out[i]);
+            Console.WriteLine($"{i} {xy_out[i]}");
         }
 
         return tpp;

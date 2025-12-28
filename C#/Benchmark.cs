@@ -1,7 +1,5 @@
 ﻿using System;
 
-using static CSharpFftDemo.GlobalResourceManager;
-
 namespace CSharpFftDemo;
 
 internal sealed class Arguments
@@ -85,61 +83,58 @@ internal static class Benchmark
             var opts = ArgumentParser.Parse(args);
             Console.WriteLine($"Log2FftSize: {opts.Log2FftSize}, Repeat: {opts.FftRepeat}");
 
-            Params.Log2FftSize = opts.Log2FftSize;
-            Params.FftRepeat = opts.FftRepeat;
-
-            return Benchmarks(opts.DotnetBenchmark, opts.ManagedBenchmark, opts.NativeBenchmark);
+            return Benchmarks(opts);
         }
         catch (Exception e)
         {
-            Console.WriteLine(GetStringResource("UnhandledExceptionText")!, e.Message);
+            Console.WriteLine($"Unhandled exception: {e.Message}");
             return -4;
         }
     }
 
-    private static int Benchmarks(bool dotnetBenchmark, bool managedBenchmark, bool nativeBenchmark)
+    private static int Benchmarks(Arguments opts)
     {
         double? managedElapsedMillisecond = null;
         double? nativeElapsedMillisecond = null;
 
-        if (dotnetBenchmark)
+        if (opts.DotnetBenchmark)
         {
             // Benchmark
-            DotnetBenchmark.Calculate();
+            DotnetBenchmark.Calculate(opts.Log2FftSize);
         }
 
-        if (managedBenchmark)
+        if (opts.ManagedBenchmark)
         {
             // Warmup
             Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine(GetStringResource("ManagedWarmupText"));
+            Console.WriteLine("---- MANAGED (warmup) ----");
             Console.ForegroundColor = ConsoleColor.Gray;
 
-            FftManaged.WarmUp(Params.Log2FftSize, Params.FftRepeat);
+            FftManaged.WarmUp(opts.Log2FftSize, opts.FftRepeat);
 
             // Benchmark
             Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.WriteLine(GetStringResource("ManagedText"));
+            Console.WriteLine("---- MANAGED ----");
             Console.ForegroundColor = ConsoleColor.Gray;
 
-            managedElapsedMillisecond = FftManaged.Calculate(Params.Log2FftSize, Params.FftRepeat);
+            managedElapsedMillisecond = FftManaged.Calculate(opts.Log2FftSize, opts.FftRepeat);
         }
 
-        if (nativeBenchmark)
+        if (opts.NativeBenchmark)
         {
             try
             {
                 // Benchmark
                 Console.ForegroundColor = ConsoleColor.Yellow;
-                Console.WriteLine(GetStringResource("NativeText"));
+                Console.WriteLine("---- NATIVE ----");
                 Console.ForegroundColor = ConsoleColor.Gray;
 
-                nativeElapsedMillisecond = FftNative.Calculate(Params.Log2FftSize, Params.FftRepeat);
+                nativeElapsedMillisecond = FftNative.Calculate(opts.Log2FftSize, opts.FftRepeat);
             }
             catch (DllNotFoundException e)
             {
-                Console.WriteLine(GetStringResource("CanotRunNative")!, e.Message);
-                Console.WriteLine(GetStringResource("HaveYouCompiledNative"));
+                Console.WriteLine($"Can not run native method: {e.Message}");
+                Console.WriteLine("Have you successfully compiled the native library?");
                 return 1;
             }
         }

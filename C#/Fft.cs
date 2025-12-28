@@ -7,9 +7,6 @@ namespace CSharpFftDemo;
 
 internal static class Fft
 {
-    // Internal variables
-    private static readonly Complex s_one = Complex.One;
-
     private static readonly Complex[] phasevec = [
             new Complex(-1, -1.22464679914735E-16),
             new Complex(6.12323399573677E-17, -1),
@@ -81,15 +78,15 @@ internal static class Fft
                 for (int i = m; i < n; i += istep)
                 {
                     // Access references for the two elements to avoid bounds checks
-                    ref Complex aRef = ref Unsafe.Add(ref outRef, i);
-                    ref Complex bRef = ref Unsafe.Add(ref outRef, i + mmax);
+                    ref Complex upperRef = ref Unsafe.Add(ref outRef, i);
+                    ref Complex lowerRef = ref Unsafe.Add(ref outRef, i + mmax);
 
-                    // Compute temp = w_XY * bRef (preserve original operation order)
-                    Complex tempXY = w_XY * bRef;
+                    // Compute temp = w_XY * lowerRef (preserve original operation order)
+                    Complex tempXY = w_XY * lowerRef;
 
                     // Perform updates in same order as original
-                    bRef = aRef - tempXY;
-                    aRef = aRef + tempXY;
+                    lowerRef = upperRef - tempXY;
+                    upperRef += tempXY;
                 }
 
                 // Update w_XY exactly once per m (preserve original semantics)

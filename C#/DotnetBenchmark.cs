@@ -4,8 +4,6 @@ using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Diagnosers;
 using BenchmarkDotNet.Running;
 
-using static CSharpFftDemo.GlobalResourceManager;
-
 namespace CSharpFftDemo;
 
 [MinColumn, MaxColumn, MeanColumn, MedianColumn]
@@ -13,24 +11,35 @@ namespace CSharpFftDemo;
 [DisassemblyDiagnoser]
 public class DotnetBenchmark
 {
-    private static readonly int size = 1 << Params.Log2FftSize;
-    private static readonly Complex[] xyManaged = new Complex[size];
-    private static readonly Complex[] xyOutManaged = new Complex[size];
+    public static int Log2FftSize { get; set; }
 
-    private readonly FftNative.DoubleComplex[] xyNative = new FftNative.DoubleComplex[size];
-    private readonly FftNative.DoubleComplex[] xyOutNative = new FftNative.DoubleComplex[size];
+    private int size;
+    private Complex[] xyManaged = null!;
+    private Complex[] xyOutManaged = null!;
 
-    public static void Calculate()
+    private FftNative.DoubleComplex[] xyNative = null!;
+    private FftNative.DoubleComplex[] xyOutNative = null!;
+
+    public static void Calculate(int log2FftSize)
     {
+        Log2FftSize = log2FftSize;
+
         Console.ForegroundColor = ConsoleColor.Yellow;
-        Console.WriteLine(GetStringResource("BenchmarkDotNetText"));
+        Console.WriteLine("---- BENCHMARK.NET ----");
         Console.ForegroundColor = ConsoleColor.Gray;
 
         _ = BenchmarkRunner.Run<DotnetBenchmark>();
     }
 
-    public DotnetBenchmark()
+    [GlobalSetup]
+    public void Setup()
     {
+        size = 1 << Log2FftSize;
+        xyManaged = new Complex[size];
+        xyOutManaged = new Complex[size];
+        xyNative = new FftNative.DoubleComplex[size];
+        xyOutNative = new FftNative.DoubleComplex[size];
+
         int i;
 
         for (i = 0; i < size / 2; i++)
@@ -57,12 +66,12 @@ public class DotnetBenchmark
     [Benchmark]
     public void Managed()
     {
-        Fft.Calculate(Params.Log2FftSize, xyManaged, xyOutManaged);
+        Fft.Calculate(Log2FftSize, xyManaged, xyOutManaged);
     }
 
     [Benchmark(Baseline = true)]
     public void Native()
     {
-        FftNative.Fft(Params.Log2FftSize, xyNative, xyOutNative);
+        FftNative.Fft(Log2FftSize, xyNative, xyOutNative);
     }
 }
