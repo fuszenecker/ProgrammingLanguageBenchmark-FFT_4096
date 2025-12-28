@@ -12,11 +12,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
     - name: Setup .NET
-      uses: actions/setup-dotnet@v2
+      uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: '9.0.100'
+        dotnet-version: '10.0.x'
     - name: Restore dependencies
       working-directory: C#
       run: dotnet restore fft-benchmark.csproj
@@ -29,11 +29,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
     - name: Setup .NET
-      uses: actions/setup-dotnet@v2
+      uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: '9.0.100'
+        dotnet-version: '10.0.x'
     - name: Build
       working-directory: C#
       run: make
@@ -43,11 +43,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
     - name: Setup .NET
-      uses: actions/setup-dotnet@v2
+      uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: '9.0.100'
+        dotnet-version: '10.0.x'
     - name: Build
       working-directory: C#
       run: make
