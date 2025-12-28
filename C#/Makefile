@@ -23,12 +23,15 @@ OBJS=fft.o
 
 TARGET=benchmark
 
-all: libfft
+all: libfft libfftr
 	dotnet build -c Release -p:VersionPrefix=$(VERSION) fft-benchmark.csproj
 	dotnet publish -c Release -o $(DESTDIR) --self-contained -r linux-$(ARCH) -p:PublishTrimmed=False -p:VersionPrefix=$(VERSION) fft-benchmark.csproj
 
 libfft: $(OBJS)
 	$(CC) $(OBJS) $(LDFLAGS) -o libfft.so
+
+libfftr: 
+	cd rust && ./build.sh && cp target/release/libfftr.so ..
 
 clean:
 	rm -fr $(TARGET) bin obj *.o *.so BenchmarkDotNet.Artifacts dist *.deb

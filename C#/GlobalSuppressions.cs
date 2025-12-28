@@ -5,10 +5,10 @@
 
 using System.Diagnostics.CodeAnalysis;
 
-[assembly: SuppressMessage("Security", "CA5393:Do not use unsafe DllImportSearchPath value", Justification = "<Pending>", Scope = "member", Target = "~M:CSharpFftDemo.FftNative.Fft(System.Int32,CSharpFftDemo.FftNative.DoubleComplex[],CSharpFftDemo.FftNative.DoubleComplex[])")]
-[assembly: SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "<Pending>", Scope = "member", Target = "~M:CSharpFftDemo.Benchmark.Main(System.String[])~System.Int32")]
-[assembly: SuppressMessage("Maintainability", "CA1515:Consider making public types internal", Justification = "<Pending>", Scope = "type", Target = "~T:CSharpFftDemo.DotnetBenchmark")]
-[assembly: SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "<Pending>", Scope = "member", Target = "~M:CSharpFftDemo.DotnetBenchmark.Managed")]
+[assembly: SuppressMessage("Security", "CA5393:Do not use unsafe DllImportSearchPath value", Justification = "Loading from application directory is intended for this benchmark.")]
+[assembly: SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "General catch is used for top-level error reporting in benchmark.")]
+[assembly: SuppressMessage("Maintainability", "CA1515:Consider making public types internal", Justification = "Benchmark classes are intended to be public for BenchmarkDotNet.")]
+[assembly: SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "BenchmarkDotNet requires instance methods for benchmarks.")]
 [assembly: SuppressMessage("Performance", "CA1812:Avoid uninstantiated internal classes", Justification = "Reason for suppression", Scope = "module")]
 [assembly: SuppressMessage("Globalization", "CA1303:Do not pass literals as localized parameters", Justification = "Benchmark tool does not require localization")]
 

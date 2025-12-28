@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 
 namespace CSharpFftDemo;
 
-internal static partial class FftNative
+internal static partial class FftNativeC
 {
     [StructLayout(LayoutKind.Explicit)]
     internal struct DoubleComplex(double real, double imaginary)

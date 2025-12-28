@@ -12,7 +12,7 @@ namespace CSharpFftDemo;
 [MinColumn, MaxColumn, MeanColumn, MedianColumn]
 [MemoryDiagnoser]
 [DisassemblyDiagnoser]
-public class DotnetBenchmark
+public class DotnetBenchmark : IDisposable
 {
     private sealed class Config : ManualConfig
     {
@@ -30,8 +30,12 @@ public class DotnetBenchmark
     private Complex[] xyManaged = null!;
     private Complex[] xyOutManaged = null!;
 
-    private FftNative.DoubleComplex[] xyNative = null!;
-    private FftNative.DoubleComplex[] xyOutNative = null!;
+    private FftNativeC.DoubleComplex[] xyNative = null!;
+    private FftNativeC.DoubleComplex[] xyOutNative = null!;
+
+    private FftNativeRust.DoubleComplex[] xyRust = null!;
+    private FftNativeRust.DoubleComplex[] xyOutRust = null!;
+    private FftNativeRust.FftHandle rustHandle = null!;
 
     public static void Calculate(int log2FftSize)
     {
@@ -50,29 +54,46 @@ public class DotnetBenchmark
         size = 1 << Log2FftSize;
         xyManaged = new Complex[size];
         xyOutManaged = new Complex[size];
-        xyNative = new FftNative.DoubleComplex[size];
-        xyOutNative = new FftNative.DoubleComplex[size];
+        xyNative = new FftNativeC.DoubleComplex[size];
+        xyOutNative = new FftNativeC.DoubleComplex[size];
+        xyRust = new FftNativeRust.DoubleComplex[size];
+        xyOutRust = new FftNativeRust.DoubleComplex[size];
+        rustHandle = new FftNativeRust.FftHandle();
 
         int i;
 
         for (i = 0; i < size / 2; i++)
         {
             xyManaged[i] = new Complex(1.0, 0.0);
+            xyNative[i] = new FftNativeC.DoubleComplex(1.0f, 0.0f);
+            xyRust[i] = new FftNativeRust.DoubleComplex(1.0f, 0.0f);
         }
 
         for (i = size / 2; i < size; i++)
         {
             xyManaged[i] = new Complex(-1.0, 0.0);
+            xyNative[i] = new FftNativeC.DoubleComplex(-1.0f, 0.0f);
+            xyRust[i] = new FftNativeRust.DoubleComplex(-1.0f, 0.0f);
         }
+    }
 
-        for (i = 0; i < size / 2; i++)
-        {
-            xyNative[i] = new FftNative.DoubleComplex(1.0f, 0.0f);
-        }
+    [GlobalCleanup]
+    public void Cleanup()
+    {
+        Dispose();
+    }
 
-        for (i = size / 2; i < size; i++)
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (disposing)
         {
-            xyNative[i] = new FftNative.DoubleComplex(-1.0f, 0.0f);
+            rustHandle?.Dispose();
         }
     }
 
@@ -83,8 +104,14 @@ public class DotnetBenchmark
     }
 
     [Benchmark(Baseline = true)]
-    public void Native()
+    public void NativeC()
     {
-        FftNative.Fft(Log2FftSize, xyNative, xyOutNative);
+        FftNativeC.Fft(Log2FftSize, xyNative, xyOutNative);
+    }
+
+    [Benchmark]
+    public void NativeRust()
+    {
+        rustHandle.Fft(xyOutRust, xyRust, size);
     }
 }

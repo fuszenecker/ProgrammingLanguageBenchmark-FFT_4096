@@ -7,6 +7,7 @@ internal sealed class Arguments
     public bool DotnetBenchmark { get; set; }
     public bool ManagedBenchmark { get; set; } = true;
     public bool NativeBenchmark { get; set; }
+    public bool RustBenchmark { get; set; }
     public int FftRepeat { get; set; } = 20000;
     public int Log2FftSize { get; set; } = 12;
 }
@@ -32,6 +33,10 @@ internal static class ArgumentParser
             else if (arg == "-n" || arg == "--native")
             {
                 arguments.NativeBenchmark = true;
+            }
+            else if (arg == "-u" || arg == "--rust")
+            {
+                arguments.RustBenchmark = true;
             }
             else if (arg == "-r" || arg == "--repeat")
             {
@@ -68,6 +73,7 @@ internal static class ArgumentParser
         Console.WriteLine("  -d, --dotnet-benchmark    Run the BenchmarkDotNet benchmark");
         Console.WriteLine("  -m, --managed              Run the .NET managed benchmark (default)");
         Console.WriteLine("  -n, --native               Run the native (C-fast_double) benchmark");
+        Console.WriteLine("  -u, --rust                 Run the native (Rust) benchmark");
         Console.WriteLine("  -r, --repeat <N>           Number of iterations (default: 20000)");
         Console.WriteLine("  -s, --size <N>             Log2 of buffer size (default: 12 for 4096 samples)");
         Console.WriteLine("  -h, --help                 Show this help message");
@@ -97,6 +103,7 @@ internal static class Benchmark
     {
         double? managedElapsedMillisecond = null;
         double? nativeElapsedMillisecond = null;
+        double? rustElapsedMillisecond = null;
 
         if (opts.DotnetBenchmark)
         {
@@ -130,7 +137,26 @@ internal static class Benchmark
                 Console.WriteLine("---- NATIVE ----");
                 Console.ForegroundColor = ConsoleColor.Gray;
 
-                nativeElapsedMillisecond = FftNative.Calculate(opts.Log2FftSize, opts.FftRepeat);
+                nativeElapsedMillisecond = FftNativeC.Calculate(opts.Log2FftSize, opts.FftRepeat);
+            }
+            catch (DllNotFoundException e)
+            {
+                Console.WriteLine($"Can not run native method: {e.Message}");
+                Console.WriteLine("Have you successfully compiled the native library?");
+                return 1;
+            }
+        }
+
+        if (opts.RustBenchmark)
+        {
+            try
+            {
+                // Benchmark
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine("---- RUST ----");
+                Console.ForegroundColor = ConsoleColor.Gray;
+
+                rustElapsedMillisecond = FftNativeRust.Calculate(opts.Log2FftSize, opts.FftRepeat);
             }
             catch (DllNotFoundException e)
             {
@@ -145,6 +171,14 @@ internal static class Benchmark
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine($"Native Ratio: {managedElapsedMillisecond / nativeElapsedMillisecond:0.####}");
             Console.WriteLine($"Native Diff%: {managedElapsedMillisecond / nativeElapsedMillisecond - 1:0.##%}");
+            Console.ForegroundColor = ConsoleColor.Gray;
+        }
+
+        if (managedElapsedMillisecond.HasValue && rustElapsedMillisecond.HasValue)
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine($"Rust Ratio: {managedElapsedMillisecond / rustElapsedMillisecond:0.####}");
+            Console.WriteLine($"Rust Diff%: {managedElapsedMillisecond / rustElapsedMillisecond - 1:0.##%}");
             Console.ForegroundColor = ConsoleColor.Gray;
         }
 
