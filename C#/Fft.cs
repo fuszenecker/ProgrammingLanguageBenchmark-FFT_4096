@@ -1,14 +1,13 @@
 ﻿using System;
 using System.Numerics;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace CSharpFftDemo;
 
-public sealed class Fft
+internal static partial class FftManaged
 {
-    // Internal variables
-    private static readonly Complex s_one = Complex.One;
-
-    private static readonly Complex[] phasevec = new[] {
+    private static readonly Complex[] phasevec = [
             new Complex(-1, -1.22464679914735E-16),
             new Complex(6.12323399573677E-17, -1),
             new Complex(0.707106781186548, -0.707106781186548),
@@ -41,12 +40,15 @@ public sealed class Fft
             new Complex(1, -5.85167231706864E-09),
             new Complex(1, 2.92583615853432E-09),
             new Complex(1, 0)
-        };
+        ];
 
     // Public function
-    public unsafe static void Calculate(int Log2FftSize, Span<Complex> xyIn, Span<Complex> xyOut)
+    public static unsafe void Calculate(int Log2FftSize, Span<Complex> xyIn, Span<Complex> xyOut)
     {
-        var n = 1 << Log2FftSize;
+        int n = 1 << Log2FftSize;
+        // Use refs to avoid repeated Span indexing/bounds checks
+        ref Complex inRef = ref MemoryMarshal.GetReference(xyIn);
+        ref Complex outRef = ref MemoryMarshal.GetReference(xyOut);
 
         for (int i = 0; i < n; i++)
         {
@@ -59,7 +61,7 @@ public sealed class Fft
             brev = (brev >> 16) | (brev << 16);
 
             brev >>= 32 - Log2FftSize;
-            xyOut[(int)brev] = xyIn[i];
+            Unsafe.Add(ref outRef, (int)brev) = Unsafe.Add(ref inRef, i);
         }
 
         int l2pt = 0;
@@ -68,19 +70,26 @@ public sealed class Fft
         while (n > mmax)
         {
             int istep = mmax << 1;
-            var wphase_XY = phasevec[l2pt++];
-            var w_XY = s_one;
+            Complex wphase_XY = phasevec[l2pt++];
+            Complex w_XY = Complex.One;
 
             for (int m = 0; m < mmax; m++)
             {
                 for (int i = m; i < n; i += istep)
                 {
-                    var tempXY = w_XY * xyOut[i + mmax];
+                    // Access references for the two elements to avoid bounds checks
+                    ref Complex upperRef = ref Unsafe.Add(ref outRef, i);
+                    ref Complex lowerRef = ref Unsafe.Add(ref outRef, i + mmax);
 
-                    xyOut[i + mmax] = xyOut[i] - tempXY;
-                    xyOut[i] += tempXY;
+                    // Compute temp = w_XY * lowerRef (preserve original operation order)
+                    Complex tempXY = w_XY * lowerRef;
+
+                    // Perform updates in same order as original
+                    lowerRef = upperRef - tempXY;
+                    upperRef += tempXY;
                 }
 
+                // Update w_XY exactly once per m (preserve original semantics)
                 w_XY *= wphase_XY;
             }
 

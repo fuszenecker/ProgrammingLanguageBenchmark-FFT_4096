@@ -2,11 +2,9 @@ using System;
 using System.Diagnostics;
 using System.Numerics;
 
-using static CSharpFftDemo.GlobalResourceManager;
-
 namespace CSharpFftDemo;
 
-internal static class FftManaged
+internal static partial class FftManaged
 {
     public static double Calculate(int log2FftSize, int fftRepeat)
     {
@@ -26,24 +24,24 @@ internal static class FftManaged
         }
 
         // FFT
-        var stopwatch = Stopwatch.StartNew();
+        Stopwatch stopwatch = Stopwatch.StartNew();
 
         for (i = 0; i < fftRepeat; i++)
         {
-            Fft.Calculate(log2FftSize, xy, xy_out);
+            Calculate(log2FftSize, xy, xy_out);
         }
 
         stopwatch.Stop();
 
         Console.WriteLine($"Total ({fftRepeat}): {stopwatch.ElapsedMilliseconds}");
 
-        var tpp = stopwatch.ElapsedMilliseconds / (float)fftRepeat;
+        float tpp = stopwatch.ElapsedMilliseconds / (float)fftRepeat;
 
         Console.WriteLine($"{fftRepeat} piece(s) of {1 << log2FftSize} pt FFT;  {tpp} ms/piece\n");
 
         for (i = 0; i < 6; i++)
         {
-            Console.WriteLine(GetStringResource("ZeroTabOne")!, i, xy_out[i]);
+            Console.WriteLine($"{i} {xy_out[i]}");
         }
 
         return tpp;
@@ -66,10 +64,10 @@ internal static class FftManaged
             xy[i] = new Complex(-1.0, 0.0);
         }
 
-        // JIT warm up ... possible give more speed
+        // JIT warm up ... possible gives more speed
         for (i = 0; i < fftRepeat; i++)
         {
-            Fft.Calculate(log2FftSize, xy, xy_out);
+            Calculate(log2FftSize, xy, xy_out);
         }
     }
 }

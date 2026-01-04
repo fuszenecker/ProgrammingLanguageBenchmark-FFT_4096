@@ -12,11 +12,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
     - name: Setup .NET
-      uses: actions/setup-dotnet@v2
+      uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: '8.0.100-rc.1.23463.5'
+        dotnet-version: '10.0.x'
     - name: Restore dependencies
       working-directory: C#
       run: dotnet restore fft-benchmark.csproj
@@ -29,11 +29,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
     - name: Setup .NET
-      uses: actions/setup-dotnet@v2
+      uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: '8.0.100-preview.6.23330.14'
+        dotnet-version: '10.0.x'
     - name: Build
       working-directory: C#
       run: make
@@ -43,11 +43,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
     - name: Setup .NET
-      uses: actions/setup-dotnet@v2
+      uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: '8.0.100-preview.6.23330.14'
+        dotnet-version: '10.0.x'
     - name: Build
       working-directory: C#
       run: make
@@ -55,8 +55,9 @@ jobs:
       working-directory: C#
       run: make package
     - name: Publish artifact
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4.6.0
       with:
         name: fft-benchmark
         path: C#/*.deb
         retention-days: 3
+        overwrite: true

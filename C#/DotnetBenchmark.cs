@@ -3,68 +3,115 @@ using System.Numerics;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Columns;
 using BenchmarkDotNet.Configs;
+using BenchmarkDotNet.Diagnosers;
 using BenchmarkDotNet.Loggers;
 using BenchmarkDotNet.Running;
-using BenchmarkDotNet.Validators;
-using MathNet.Numerics.IntegralTransforms;
-
-using static CSharpFftDemo.GlobalResourceManager;
-
-#pragma warning disable CA1822
 
 namespace CSharpFftDemo;
 
-[MarkdownExporterAttribute.GitHub]
-[MinColumn, MaxColumn]
+[MinColumn, MaxColumn, MeanColumn, MedianColumn]
 [MemoryDiagnoser]
-// [NativeMemoryProfiler]
-public class DotnetBenchmark
+[DisassemblyDiagnoser]
+public class DotnetBenchmark : IDisposable
 {
-    private static readonly int size = 1 << Params.Log2FftSize;
-    private static readonly Complex[] xyManaged = new Complex[size];
-    private static readonly Complex[] xyOutManaged = new Complex[size];
-
-    private readonly FftNative.DoubleComplex[] xyNative = new FftNative.DoubleComplex[size];
-    private readonly FftNative.DoubleComplex[] xyOutNative = new FftNative.DoubleComplex[size];
-
-    public static void Calculate()
+    private sealed class Config : ManualConfig
     {
-        Console.ForegroundColor = ConsoleColor.Yellow;
-        Console.WriteLine(GetStringResource("BenchmarkDotNetText"));
-        Console.ForegroundColor = ConsoleColor.Gray;
-
-        var config = new ManualConfig()
-            .WithOptions(ConfigOptions.DisableOptimizationsValidator)
-            .AddValidator(JitOptimizationsValidator.DontFailOnError)
-            .AddLogger(ConsoleLogger.Default)
-            .AddColumnProvider(DefaultColumnProviders.Instance);
-
-        BenchmarkRunner.Run<DotnetBenchmark>(config);
+        public Config()
+        {
+            AddLogger(ConsoleLogger.Default);
+            AddColumnProvider(DefaultColumnProviders.Instance);
+            WithOptions(ConfigOptions.DisableOptimizationsValidator);
+        }
     }
 
-    public DotnetBenchmark()
+    public static int Log2FftSize { get; set; }
+
+    private int size;
+    private Complex[] xyManaged = null!;
+    private Complex[] xyOutManaged = null!;
+
+    private FftNativeC.DoubleComplex[] xyNative = null!;
+    private FftNativeC.DoubleComplex[] xyOutNative = null!;
+
+    private FftNativeRust.DoubleComplex[] xyRust = null!;
+    private FftNativeRust.DoubleComplex[] xyOutRust = null!;
+    private FftNativeRust.FftHandle rustHandle = null!;
+
+    public static void Calculate(int log2FftSize)
     {
+        Log2FftSize = log2FftSize;
+
+        Console.ForegroundColor = ConsoleColor.Yellow;
+        Console.WriteLine("---- BENCHMARK.NET ----");
+        Console.ForegroundColor = ConsoleColor.Gray;
+
+        _ = BenchmarkRunner.Run<DotnetBenchmark>(new Config());
+    }
+
+    [GlobalSetup]
+    public void Setup()
+    {
+        size = 1 << Log2FftSize;
+        xyManaged = new Complex[size];
+        xyOutManaged = new Complex[size];
+        xyNative = new FftNativeC.DoubleComplex[size];
+        xyOutNative = new FftNativeC.DoubleComplex[size];
+        xyRust = new FftNativeRust.DoubleComplex[size];
+        xyOutRust = new FftNativeRust.DoubleComplex[size];
+        rustHandle = new FftNativeRust.FftHandle();
+
         int i;
 
         for (i = 0; i < size / 2; i++)
+        {
             xyManaged[i] = new Complex(1.0, 0.0);
+            xyNative[i] = new FftNativeC.DoubleComplex(1.0f, 0.0f);
+            xyRust[i] = new FftNativeRust.DoubleComplex(1.0f, 0.0f);
+        }
 
         for (i = size / 2; i < size; i++)
+        {
             xyManaged[i] = new Complex(-1.0, 0.0);
+            xyNative[i] = new FftNativeC.DoubleComplex(-1.0f, 0.0f);
+            xyRust[i] = new FftNativeRust.DoubleComplex(-1.0f, 0.0f);
+        }
+    }
 
-        for (i = 0; i < size / 2; i++)
-            xyNative[i] = new FftNative.DoubleComplex(1.0f, 0.0f);
+    [GlobalCleanup]
+    public void Cleanup()
+    {
+        Dispose();
+    }
 
-        for (i = size / 2; i < size; i++)
-            xyNative[i] = new FftNative.DoubleComplex(-1.0f, 0.0f);
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (disposing)
+        {
+            rustHandle?.Dispose();
+        }
     }
 
     [Benchmark]
-    public void Managed() => Fft.Calculate(Params.Log2FftSize, xyManaged, xyOutManaged);
+    public void Managed()
+    {
+        FftManaged.Calculate(Log2FftSize, xyManaged, xyOutManaged);
+    }
+
+    [Benchmark(Baseline = true)]
+    public void NativeC()
+    {
+        FftNativeC.Fft(Log2FftSize, xyNative, xyOutNative);
+    }
 
     [Benchmark]
-    public void Native() => FftNative.Fft(Params.Log2FftSize, xyNative, xyOutNative);
-
-    [Benchmark]
-    public void MathNet() => Fourier.Forward(xyManaged);
+    public void NativeRust()
+    {
+        rustHandle.Fft(xyOutRust, xyRust, size);
+    }
 }
